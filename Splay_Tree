@@ -1,0 +1,374 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Tree {
+
+	/* Create a TreeNode class which will be helpful in creating new TreeNodes */
+	public static class TreeNode {
+		Integer data;
+		TreeNode leftChild, rightChild, parentNode;
+
+		TreeNode(Integer data, TreeNode leftChild, TreeNode rightChild,
+				TreeNode parentNode) {
+			this.data = data;
+			this.leftChild = leftChild;
+			this.rightChild = rightChild;
+			this.parentNode = parentNode;
+		}
+	}
+
+	// Create a root node
+	TreeNode root;
+
+	// Initialize the root
+	public Tree() {
+		root = null;
+	}
+
+	/* This section is used to print the tree levelwise */
+	public void printLevelWise() {
+		PrintLevelwiseTree(root);
+	}
+
+	public void PrintLevelwiseTree(TreeNode root) {
+		Queue<TreeNode> singleLevel = new LinkedList<>();
+		singleLevel.add(root);
+		while (!singleLevel.isEmpty()) {
+			TreeNode node = singleLevel.poll();
+			System.out.print(" " + node.data + " ");
+			if (node.leftChild != null)
+				singleLevel.add(node.leftChild);
+			if (node.rightChild != null)
+				singleLevel.add(node.rightChild);
+		}
+	}
+
+	/* These methods are used to add a new node to the tree */
+	public void add(Integer treeData) {
+		add(root, treeData);
+	}
+
+	public void add(TreeNode currentNode, Integer treeData) {
+
+		if (currentNode == null) {
+			// As this is a root node it won't have any parent and also at this
+			// stage, both of its children are empty
+			root = new TreeNode(treeData, null, null, null);
+		}
+		// If this is not the first node to be added then perform following
+		// operations
+		else {
+			// Find an appropriate place to add the new node
+			while (currentNode != null) {
+
+				// Check if node to be added is smaller than the currentNode
+				if (currentNode.data < treeData) {
+					if (currentNode.rightChild == null) {
+						currentNode.rightChild = new TreeNode(treeData, null,
+								null, currentNode);
+
+						rotateTree(currentNode.rightChild);
+						return;
+					} else {
+						// Continue to the left of tree to add the element
+						currentNode = currentNode.rightChild;
+					}
+				} else if (currentNode.data > treeData) {
+					if (currentNode.leftChild == null) {
+						currentNode.leftChild = new TreeNode(treeData, null,
+								null, currentNode);
+
+						rotateTree(currentNode.leftChild);
+						return;
+					} else {
+						// Continue to the left of tree to add the element
+						currentNode = currentNode.leftChild;
+					}
+
+				}
+				// If we have duplicate elements then we won't add it to the
+				// tree
+				else {
+					return;
+				}
+			}
+
+		}
+	}
+
+	/*
+	 * This method is used to rotate the tree after adding/deleting a node from
+	 * the tree
+	 */
+	public void rotateTree(TreeNode currentNode) {
+
+		if (currentNode != null) {
+			/*
+			 * When we consider rotation, along with currentNode, we have to
+			 * consider its parentNode as well. (i.e. grandparent of the
+			 * currentNode)*\
+			 */
+			if (currentNode.parentNode != null) {
+				TreeNode tempNode;
+				TreeNode grandParentOfCurrentNode = currentNode.parentNode.parentNode;
+
+				// Check if the rotation is Zig-Zig or Zig-Zag
+				if (currentNode.parentNode.rightChild == currentNode) {
+					if (grandParentOfCurrentNode == null) {
+						tempNode = rotateZagOnly(currentNode.parentNode);
+					} else if (grandParentOfCurrentNode.leftChild == currentNode.parentNode) {
+						tempNode = rotateZigZagOnly(grandParentOfCurrentNode);
+					} else {
+						tempNode = rotateZagZag(grandParentOfCurrentNode);
+					}
+				} else {
+
+					if (grandParentOfCurrentNode == null) {
+						tempNode = rotateZigOnly(currentNode.parentNode);
+					} else if (grandParentOfCurrentNode.leftChild == currentNode.parentNode) {
+						tempNode = rotateZigZig(grandParentOfCurrentNode);
+					} else {
+						tempNode = rotateZag(grandParentOfCurrentNode);
+					}
+				}
+
+				rotateTree(tempNode);
+			}
+
+		} else {
+			return;
+		}
+
+	}
+
+	/* This method is used to perform Zig-Zig rotation */
+	public TreeNode rotateZigZig(TreeNode node1) {
+		TreeNode nodeAfterOneZigZigRotation = rotateZigOnly(node1);
+		return rotateZigOnly(nodeAfterOneZigZigRotation);
+	}
+
+	/* This method is used to perform Zag-Zag rotation */
+	public TreeNode rotateZagZag(TreeNode node2) {
+		TreeNode nodeAfterOneZagZagRotation = rotateZagOnly(node2);
+		return rotateZagOnly(nodeAfterOneZagZagRotation);
+	}
+
+	/* This method is used to perform Zig-Zag rotation */
+	public TreeNode rotateZigZagOnly(TreeNode node3) {
+		rotateZagOnly(node3.leftChild);
+		return rotateZigOnly(node3);
+	}
+
+	/* This method is used to perform Zag rotation */
+	public TreeNode rotateZag(TreeNode node4) {
+		rotateZigOnly(node4.rightChild);
+		return rotateZagOnly(node4);
+	}
+
+	/* This method is used to perform Zig rotation */
+	public TreeNode rotateZigOnly(TreeNode node4) {
+		TreeNode tempNode = node4.leftChild;
+		node4.leftChild = tempNode.rightChild;
+		tempNode.rightChild = node4;
+		changeParentNode(tempNode, node4);
+		return tempNode;
+	}
+
+	/* This method is used to perform Zag rotation */
+	public TreeNode rotateZagOnly(TreeNode node5) {
+		TreeNode tempNode = node5.rightChild;
+		node5.rightChild = tempNode.leftChild;
+		tempNode.leftChild = node5;
+		changeParentNode(tempNode, node5);
+		return tempNode;
+	}
+
+	/* This method is used to update the parent after completing a rotation */
+	public void changeParentNode(TreeNode tempNode1, TreeNode tempNode2) {
+		tempNode1.parentNode = tempNode2.parentNode;
+		tempNode2.parentNode = tempNode1;
+
+		if (tempNode1.parentNode != null) {
+
+			if (tempNode2 == tempNode1.parentNode.leftChild) {
+				tempNode1.parentNode.leftChild = tempNode1;
+			} else {
+				tempNode1.parentNode.rightChild = tempNode1;
+			}
+		} else {
+			root = tempNode1;
+		}
+	}
+
+	/*
+	 * These methods are used to return a string value of inorder traversal of
+	 * the tree
+	 */
+	public String toString() {
+		StringBuffer stringBuffer = new StringBuffer();
+		inOrderTraversal(stringBuffer, root);
+		return stringBuffer.toString();
+	}
+
+	public void inOrderTraversal(StringBuffer stringBuffer, TreeNode currentNode) {
+		if (currentNode != null) {
+			stringBuffer.append(currentNode.data + "  ");
+			inOrderTraversal(stringBuffer, currentNode.leftChild);
+			inOrderTraversal(stringBuffer, currentNode.rightChild);
+		} else {
+			return;
+		}
+
+	}
+
+	/*
+	 * Following two methods are used to find a particular node in the splay
+	 * tree
+	 */
+	public boolean find(Integer treeData) {
+		return find(treeData, root);
+	}
+
+	public boolean find(Integer treeData, TreeNode currentNode) {
+
+		if (currentNode != null) {
+			TreeNode lastTreeNode = null;
+
+			while (currentNode != null) {
+				if (currentNode.data < treeData) {
+					lastTreeNode = currentNode;
+					currentNode = currentNode.rightChild;
+				} else if (currentNode.data > treeData) {
+					lastTreeNode = currentNode;
+					currentNode = currentNode.leftChild;
+				} else {
+					// current node is made root
+					rotateTree(currentNode);
+					return true;
+				}
+			}
+			// current node is made root
+			rotateTree(lastTreeNode);
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	/*
+	 * Following two methods are used to find count of all leaves in the Splay
+	 * tree
+	 */
+	public int leafCount() {
+		return leafCount(root);
+	}
+
+	public int leafCount(TreeNode treeNode) {
+		if (treeNode == null)
+			return 0;
+		else {
+			if (treeNode.leftChild == null && treeNode.rightChild == null) {
+				return 1;
+			}
+		}
+		return leafCount(treeNode.leftChild) + leafCount(treeNode.rightChild);
+
+	}
+
+	/* Following two methods are used to find the sum of all values in the tree */
+	public Integer treeSum() {
+		return treeSum(root);
+	}
+
+	public Integer treeSum(TreeNode treeNode) {
+
+		Integer sumofLeftSubTree = 0, sumofRightSubTree = 0, treeSum = 0;
+
+		if (treeNode == null) {
+			treeSum = 0;
+			return treeSum;
+		} else {
+			sumofLeftSubTree = treeSum(treeNode.leftChild);
+			sumofRightSubTree = treeSum(treeNode.rightChild);
+			treeSum = treeNode.data + sumofLeftSubTree + sumofRightSubTree;
+			return treeSum;
+		}
+
+	}
+
+}// end of class Tree
+
+public class SplayTree {
+
+	public static void main(String args[]) {
+
+		Tree tree = new Tree();
+		System.out.println("Splay tree after adding 10");
+		tree.add(10);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 12");
+		tree.add(12);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 8");
+		tree.add(8);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 7");
+		tree.add(7);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 11");
+		tree.add(11);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 19");
+		tree.add(19);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		System.out.println("Splay tree after adding 14");
+		tree.add(14);
+		System.out.println(tree);
+		System.out.println(" ");
+
+		boolean isPresent;
+		System.out.print("Result of finding 11 in the splay tree : ");
+		isPresent = tree.find(11);
+		System.out.println(isPresent);
+		System.out.println("Splay tree after rotations-");
+		System.out.println(tree);
+
+		System.out.println(" ");
+
+		System.out.print("Result of finding 44 in the splay tree : ");
+		isPresent = tree.find(44);
+		System.out.println(isPresent);
+		System.out.println("Splay tree after rotations-");
+		System.out.println(tree);
+
+		System.out.println(" ");
+		int leafCount = 0;
+		System.out.print("Leaf count in the Splay tree : ");
+		leafCount = tree.leafCount();
+		System.out.println(leafCount);
+
+		System.out.println("");
+		int treeSum;
+		treeSum = tree.treeSum();
+		System.out.println("Sum of all values in the Splay tree is - ");
+		System.out.println(treeSum);
+
+		System.out.println("");
+		System.out.println("Printing the Splay tree level wise - ");
+		tree.printLevelWise();
+
+	}
+
+}
