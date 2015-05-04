@@ -1,0 +1,465 @@
+
+
+
+
+ public class MyLinkedList<AnyType> implements Iterable<AnyType>
+{
+	 static boolean swap = false;
+	 static boolean shift = false;
+	 static boolean erase = false;
+	 static boolean insertList = false;
+	 
+	 private static class Node<AnyType>{
+		 
+	      public AnyType data;
+		  public Node<AnyType> prev;
+		  public Node<AnyType> next; 
+		  
+	 		  public Node( AnyType d, Node<AnyType> p, Node<AnyType> n )
+		       		{ 
+		    	   		data = d; prev = p; next = n;
+		    	   	}
+		       
+
+	 }
+
+	 
+	 
+public MyLinkedList( ){ 
+		 doClear( );	 
+	  }
+
+public void doClear( )
+	    {
+	        beginMarker = new Node<>( null, null, null );
+	        endMarker = new Node<>( null, beginMarker, null );
+	        beginMarker.next = endMarker;
+	        
+	        theSize = 0;
+	        modCount++;
+	    }
+
+	 
+public void clear( ){
+	beginMarker = new Node<AnyType>( null, null, null );
+	endMarker = new Node<AnyType>( null, beginMarker, null );
+	beginMarker.next = endMarker;
+	theSize = 0;
+	modCount++;	
+}
+ 
+ 
+public int size( ){
+	 return theSize;
+}
+ 
+
+
+public boolean isEmpty( ) {
+  return size( ) == 0;
+ }
+
+
+ public boolean add( AnyType x ) {
+	 add( size( ), x ); 
+	 return true; 
+  }
+
+ public void add( int idx, AnyType x ){ 
+ addBefore( getNode( idx, 0, size( ) ), x );
+}
+ 
+ public AnyType get( int idx ) {
+	 return getNode( idx ).data; 
+}
+ 
+ public AnyType set( int idx, AnyType newVal )
+ {
+ Node<AnyType> p = getNode( idx );
+ AnyType oldVal = p.data;
+ p.data = newVal;
+ return oldVal;
+ }
+ 
+ public AnyType remove( int idx ) {
+	  return remove( getNode( idx ) );
+  }
+
+ 
+ public String toString()
+ {
+    StringBuilder sb = new StringBuilder();
+    sb.append("[ ");
+    
+    
+    for (AnyType anyType : this)
+    {
+       sb.append(anyType + " ");
+       
+    }
+    
+    sb.append(" ]");
+    
+    return new String(sb);
+ }
+ 
+ 
+ /*This method is used to swap two elements of the list
+  * @author - Kamlesh Patil (kvp120030)
+  * */
+ public void swap(int position1, int position2){
+	 //check if position1 and position2 are valid
+	 if( (position1 < 0 || position2 >= size()) || (position1>=size() || position2<0) ){
+		 System.out.println("Please enter valid index values for swapping elements");
+		 swap = false;
+	 }
+	 else{
+		 Node<AnyType> node1 = getNode(position1);
+		 Node<AnyType> node2 = getNode(position2);
+		 AnyType temp = node1.data;
+		 temp = node2.data;
+		 node2.data = node1.data;
+		 node1.data = temp;	
+		 swap = true;
+		 
+	 }
+ }
+ 
+ /*This method is used to rotate the linked list
+  * @author - Kamlesh Patil (kvp120030)
+  * */
+ public void shift(int numberOfMoves){
+     
+	 
+	 if(numberOfMoves > 0 && numberOfMoves<size() ){
+    	 Node<AnyType> startNode = beginMarker.next; 
+         Node<AnyType> endNode = endMarker.prev;      
+         
+         Node<AnyType> newEndNode = getNode(size() - (numberOfMoves+1));
+         
+         Node<AnyType> newStartingNode = getNode(size() - numberOfMoves); 
+         beginMarker.next = newStartingNode; 
+         newStartingNode.prev = beginMarker;
+         
+         
+         endNode.next = startNode;  
+         startNode.prev = endNode;
+         
+         endMarker.prev = newEndNode;
+         newEndNode.next = endMarker; 
+         
+	 }
+	 
+	 else{
+		 if(numberOfMoves==0) {
+			 return;
+		 }
+		 else{
+			 if(numberOfMoves < size()){
+				 Node<AnyType> startNode2 = beginMarker.next; 
+		         Node<AnyType> endNode2 = endMarker.prev; 
+		         
+		         Node<AnyType> tempEndNode2 = getNode( (-1)* (numberOfMoves + 1));
+		         
+		         Node<AnyType> newStartNode2 = getNode(numberOfMoves * (-1));
+		         
+		         beginMarker.next = newStartNode2; 
+		         newStartNode2.prev = beginMarker;
+		         
+		         endNode2.next = startNode2;
+		         startNode2.prev = endNode2; 
+		         
+		         endMarker.prev = tempEndNode2; 
+		         tempEndNode2.next = endMarker;  
+			 }
+			 
+	         
+		 }
+		  
+		 
+         
+	 }
+	
+	
+ }
+ 
+ /*This method is used to remove elements specified by index position and number of elements to delete
+  * @author - Kamlesh Patil (kvp120030)
+  * */
+ public void erase(int indexPosition, int numberOfElements){
+	 if(indexPosition >= 0 && indexPosition <=size()){
+		 
+		 if(numberOfElements <= size()){
+			 
+			 if(indexPosition == 0){
+				 Node<AnyType> joiningNode = getNode(indexPosition + numberOfElements );
+				  beginMarker.next = joiningNode;
+				  joiningNode.prev = beginMarker;
+				  erase = true;
+			 }
+			 else{
+				 
+				 	if( (indexPosition + numberOfElements) < size()){
+				 		Node<AnyType> startNode = getNode(indexPosition - 1);
+				 		Node<AnyType> midNode = getNode(indexPosition + numberOfElements );
+				 		startNode.next = midNode;
+				 		midNode.prev = startNode;
+				 		erase = true;
+				 	}
+				 	else{
+				 		if(indexPosition + numberOfElements == size()){
+				 			Node<AnyType> startNode = getNode(indexPosition - 1);
+							  startNode.next = endMarker;
+							  endMarker.prev = startNode; 
+							  erase = true;
+				 		}
+				 		else{
+				 			if(indexPosition + numberOfElements > size()){
+				 				System.out.println("Please enter valid values as there are no items after index: " + size() );
+				 			}
+				 		}
+				 }
+			 }
+			 
+
+			 
+			 
+		 }
+		 else{
+			 erase = false;
+			 System.out.println("Please enter the value of number of elements to delete smaller than size of the list");
+		 }
+		 
+	 }
+	 else{
+		 erase  = false;
+		 System.out.println("Please enter valid value for index position");
+	 }
+
+ }
+ 
+ 
+ /*This method is used insert a list into another list at index position specifies as parameter
+  * @author - Kamlesh Patil (kvp120030)
+  * */
+ public void insertList(MyLinkedList<AnyType> listToBeAdded, int indexPosition){
+        
+	 if(indexPosition < this.size() - 1){
+		 Node<AnyType> indexToJoin = getNode(indexPosition);
+	        Node<AnyType> indexToJoin2 = getNode(indexPosition + 1);
+	        
+	        indexToJoin.next = listToBeAdded.beginMarker.next;
+	        listToBeAdded.beginMarker.next.prev = indexToJoin;
+	        
+	        listToBeAdded.endMarker.prev.next = indexToJoin2;
+	        indexToJoin2.prev = listToBeAdded.endMarker.prev;
+	 }
+	 else{
+		 if(indexPosition == this.size() - 1){
+			
+			
+			listToBeAdded.endMarker.prev.next = this.endMarker;
+			this.endMarker.prev.next = listToBeAdded.beginMarker.next;
+			listToBeAdded.beginMarker.next.prev = this.endMarker.prev;
+			 
+			 			 
+			
+		 }
+		 else{
+			 System.out.println("Please enter index position less than the size of main list");
+		 }
+	 }
+	 
+	   
+    //Clear the second list
+	 listToBeAdded.doClear();
+ 
+ }
+ 
+ 
+ /**
+* Adds an item to this collection, at specified position p.
+* Items at or after that position are slid one position higher.
+@param p Node to add before.
+* @param x any object.
+* @throws IndexOutOfBoundsException if idx is not between 0 and size(),.
+*/
+private void addBefore( Node<AnyType> p, AnyType x )
+{
+  Node<AnyType> newNode = new Node<>( x, p.prev, p );
+  newNode.prev.next = newNode;
+  p.prev = newNode;
+  theSize++;
+  modCount++;
+ }
+ 
+ /**
+ * Removes the object contained in Node p.
+ * @param p the Node containing the object.
+ * @return the item was removed from the collection.
+ */
+ private AnyType remove( Node<AnyType> p )
+ {
+ p.next.prev = p.prev;
+ p.prev.next = p.next;
+ theSize--;
+ modCount++;
+ return p.data;
+ }
+ 
+/**
+* Gets the Node at position idx, which must range from 0 to size( ) - 1.
+* @param idx index to search at.
+* @return internal node corresponding to idx.
+* @throws IndexOutOfBoundsException if idx is not
+* between 0 and size( ) - 1, inclusive.
+*/
+private Node<AnyType> getNode( int idx )
+{
+return getNode( idx, 0, size( ) - 1 );
+}
+
+/**
+* Gets the Node at position idx, which must range from lower to upper.
+* @param idx index to search at.
+* @param lower lowest valid index.
+* @param upper highest valid index.
+* @return internal node corresponding to idx.
+* @throws IndexOutOfBoundsException if idx is not
+* between lower and upper, inclusive.
+*/
+private Node<AnyType> getNode( int idx, int lower, int upper )
+{
+Node<AnyType> p;
+
+if( idx < lower || idx > upper )
+throw new IndexOutOfBoundsException( );
+
+if( idx < size( ) / 2 )
+{
+p = beginMarker.next;
+for( int i = 0; i < idx; i++ )
+p = p.next;
+}
+else
+{
+p = endMarker;
+ for( int i = size( ); i > idx; i-- )
+p = p.prev;
+}
+
+return p;
+}
+
+ public java.util.Iterator<AnyType> iterator( ) { 
+return new LinkedListIterator( );
+}
+ 
+ 
+ private int theSize;
+ private int modCount = 0;
+ private Node<AnyType> beginMarker;
+ private Node<AnyType> endMarker;
+ 
+ private class LinkedListIterator implements java.util.Iterator<AnyType>
+ { 
+	 
+	 private Node<AnyType> current = beginMarker.next;
+	 private int expectedModCount = modCount;
+	 private boolean okToRemove = false;
+	 
+	 public boolean hasNext( ){
+	 return current != endMarker; }
+	 
+	 public AnyType next( )
+	 {
+	 if( modCount != expectedModCount )
+	 throw new java.util.ConcurrentModificationException( );
+	 
+	 if( !hasNext( ) )
+	 throw new java.util.NoSuchElementException( );
+
+	 AnyType nextItem = current.data;
+	 current = current.next;
+	 okToRemove = true;
+	 return nextItem;
+	 }
+
+	 public void remove( )
+	 {
+	 
+		 if( modCount != expectedModCount )
+	 throw new java.util.ConcurrentModificationException( );
+	 
+		 if( !okToRemove )
+	 throw new IllegalStateException( );
+
+	 MyLinkedList.this.remove( current.prev );
+	 expectedModCount++;
+	 okToRemove = false;
+	 }
+ }
+
+ 
+ public static void main(String args[]){
+	 
+	 MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+	 
+	 /*Add elements to the list*/
+	 for( int ix = 40; ix < 48; ix++ ){
+		 myLinkedList.add( ix );
+ }
+	 
+	 System.out.println("Original Linked List is  - " + myLinkedList);
+	 System.out.println("");
+	 
+	 
+	 
+	 /*Swap elements at indices 1 and 5*/
+	 myLinkedList.swap(1, 5);
+	 if(swap){
+		 System.out.println("Linked List after swapping elements at index 1 and 5 - " + myLinkedList);	 
+	 }
+     System.out.println("");
+     
+     
+     /*Shift all elements by 4 positions to the right as we are 4 is positive integer*/
+     myLinkedList.shift(4);
+     System.out.println("Linked List after shifting elements with positive value 4 : " + myLinkedList);
+     System.out.println("");
+     
+     
+     /*Shift all elements by 5 positions to the left as we are -5 is negative integer*/
+     myLinkedList.shift(-5);
+     System.out.println("Linked List after shifting elements with negative value -5 : " + myLinkedList);
+     System.out.println("");
+     
+     
+     /*Erase 2 elements from index 5*/     
+     myLinkedList.erase(5,2);
+     if(erase){
+    	 System.out.println("Linked List after erasing 2 elements from index 5  : " + myLinkedList);	 
+     }
+     System.out.println("");
+     
+     
+     /*Create a second list which will be inserted into first list*/
+     MyLinkedList<Integer> myLinkedListToAppend = new MyLinkedList<>();
+     for( int it = 100; it < 111; it++ ){
+    	 myLinkedListToAppend.add( it );
+      }
+     
+     System.out.println("First list is - " + myLinkedList);
+     System.out.println("Second list is - " + myLinkedListToAppend);
+     
+     
+     /*Insert second list in the first list at index position 4*/
+     myLinkedList.insertList(myLinkedListToAppend, 4);
+     System.out.println("Linked List after appending second list at index 4  : " + myLinkedList);
+     
+     
+
+		 
+ }
+
+ }
