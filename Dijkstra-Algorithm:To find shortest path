@@ -1,0 +1,328 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Scanner;
+import java.util.*;
+
+
+class Vertex {
+	public Path[] adjacentVertices;
+	public boolean known;
+	public int dist;
+	public Vertex path;
+	public String name;
+}
+
+
+class Path {
+	public Vertex targetVertex;
+	public int distanceCost;
+
+	/*This constructor is used to initialize the the neighbors of a vertex*/
+	public Path(Vertex argTarget, int argCost) {
+		targetVertex = argTarget;
+		distanceCost = argCost;
+	}
+}
+
+
+class ReadTheInputFile{
+	/*This method is used to read the provided text file and then build a LinkedHashmap which has all airport and their neighboring 
+	airports
+*/
+	/*We are making use of LinkedHashMap so that we can preserve the order of the airports present in the file*/
+	public static LinkedHashMap<String, LinkedHashMap<String, Integer>> ReadFile(String fileName) {
+
+		LinkedHashMap<String, LinkedHashMap<String, Integer>> NeigborWeightPair = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
+		try {
+
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(
+					fileName));
+
+			String line = bufferedReader.readLine();
+			String[] splitLine;
+			
+			while (line != null) {
+
+				LinkedHashMap<String, Integer> eachNeighborPair = new LinkedHashMap<String, Integer>();
+				//Split the readline on white space
+				splitLine = line.split("\\s+");
+				String nodeToAdd = splitLine[0].trim();
+
+				for (int ix = 1; ix < splitLine.length; ix = ix + 2) {
+
+					eachNeighborPair.put(splitLine[ix].toString().trim(),
+							Integer.parseInt(splitLine[ix + 1]));
+
+				}
+				
+				NeigborWeightPair.put(nodeToAdd, eachNeighborPair);
+
+				line = bufferedReader.readLine();
+
+			}// end of while
+
+			bufferedReader.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return NeigborWeightPair;
+	}
+}
+
+
+
+public class Dijkstra {
+	
+	int countOfAllCities2 = 0;
+	int countNumberOfconnection = 0; 
+	Vertex[] listOfAllVertices;
+	
+	
+	void InitializeAllNodes(Vertex startingVertex, Vertex ListOfAllVertices[]) {
+		for (int i = 0; i < ListOfAllVertices.length; i++) {
+			ListOfAllVertices[i].known = false; 
+			ListOfAllVertices[i].dist = 8000; // we will use 8000 as infinity
+			
+		}
+		
+		//Initialize the own distance to 0, as this is the starting vertex
+		startingVertex.dist = 0;
+
+		
+		while (FindAllPossibleVertices(ListOfAllVertices) != countOfAllCities2) {
+			//Now, once we have visited a single vertex, to select a next vertex,
+			//we choose a vertex which known status is false and has the smallest 'dv' value
+			Vertex v = NextSmallestUnknownVertex(ListOfAllVertices); 
+			
+			//If we have visited the vertex, then mark its known status as true
+			v.known = true;
+
+			//Now, we will run the algorithm for all adjacent nodes of the current node
+			
+			int ix =0;
+			while(ix < v.adjacentVertices.length){
+				if (v.adjacentVertices[ix].targetVertex.known) {
+					//do nothing
+				}
+				else{
+					int nextImmediateVertex = v.adjacentVertices[ix].distanceCost; 
+					if (v.dist + nextImmediateVertex < v.adjacentVertices[ix].targetVertex.dist) {						
+						v.adjacentVertices[ix].targetVertex.dist = v.dist + nextImmediateVertex;
+						v.adjacentVertices[ix].targetVertex.path = v; 
+					}
+				}
+			ix++;	
+			}
+
+
+		}
+	}
+
+	/* This method is used for  obtaining the weight*/
+	int GetWeight(Vertex v) {
+		Integer price = 0;
+		if (v.path != null) {
+			price = price + v.dist;
+			GetWeight(v.path);
+		}
+		return price;
+	}
+
+	/* This method is used to get the number of connections*/
+	int CountNumberOfAdjacentVertices(Vertex v) {
+
+		if (v.path == null) {
+			//do nothing
+		}
+		else{
+			countNumberOfconnection = countNumberOfconnection + 1;
+			CountNumberOfAdjacentVertices(v.path);
+
+		}
+		int totalCount = countNumberOfconnection - 1;
+		return totalCount;
+	}
+
+	/* This method is used to print the shortest path*/
+	void DisplayRoute(Vertex v) {
+
+		if (v.path != null) {
+
+			DisplayRoute(v.path);
+			System.out.print(" -> ");
+
+		}
+		System.out.print(v.name);
+		
+		//Once, we print the routes, then its time for next iteration to find a completely new root
+		//hence we will reset the number of connections for a node as 0
+		countNumberOfconnection = 0;
+	}
+
+	
+	/* This method is used to  identify the number of vertices that are reachable from the current node*/ 
+	Integer FindAllPossibleVertices(Vertex listOfVertices[]) {
+		int maxLimit = 0;
+		
+		int ix = 0;
+		while(ix < listOfVertices.length){
+			if (listOfVertices[ix].known == false) {
+				//do nothing, just continue
+			}
+			else{
+				maxLimit = maxLimit + 1;
+			}
+			ix++;
+		}
+		
+		return maxLimit;
+	}
+
+	/*This method is used to obtain next possbile unknown vertex with the least distance*/
+	Vertex NextSmallestUnknownVertex(Vertex listOfVertices[]) {
+		int minWeight = 8000;
+		int index = 0;
+		
+		int ix = 0;
+		while(ix < listOfVertices.length){
+			if (listOfVertices[ix].known == false && listOfVertices[ix].dist < minWeight) {
+				minWeight = listOfVertices[ix].dist;
+				index = ix;
+			}
+			
+			ix++;	
+		}
+
+		return listOfVertices[index];
+	}
+	
+	
+	public Vertex GetVertexList(String cityName,Vertex[] listOfVertices)
+	{
+		int ix =0;
+		while(ix < listOfVertices.length){
+			if(listOfVertices[ix].name.equals(cityName))
+				return listOfVertices[ix];
+			ix++;
+		}
+		
+		return null;
+		
+	}
+
+	public Vertex[] BuildPathNetwork()
+	{
+		
+				LinkedHashMap<String, LinkedHashMap<String, Integer>> EachCityDistancePair = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
+				String fileName = "airports.txt";
+				ReadTheInputFile readTheInputFile = new ReadTheInputFile();
+				EachCityDistancePair = readTheInputFile.ReadFile(fileName);
+				
+				countOfAllCities2 = EachCityDistancePair.size();
+				int countOfAllCities = EachCityDistancePair.size();
+				listOfAllVertices = new Vertex[countOfAllCities];
+				
+				int ix = 0;
+				while(ix < listOfAllVertices.length){
+					listOfAllVertices[ix] = new Vertex();
+					ix++;
+				}
+				
+				
+				int index = 0;
+				for(Map.Entry<String, LinkedHashMap<String, Integer>> entry : EachCityDistancePair.entrySet()){
+					listOfAllVertices[index].name = entry.getKey();index++;
+					
+				}
+				
+				
+				
+				
+				
+				//Now, create a hashmap to store the adjacency list for each vertex
+				HashMap<String, Integer> adjacencyList = new HashMap<String,Integer>();
+				
+								
+				for(int it=0; it < countOfAllCities ; it++){
+					adjacencyList = EachCityDistancePair.get(listOfAllVertices[it].name);
+					//List[] listOfNeighbors = new List[adjacencyList.size()];
+					int totalNeigbors = 0;
+					listOfAllVertices[it].adjacentVertices = new Path[adjacencyList.size()];
+					
+					for(Map.Entry<String, Integer> entry : adjacencyList.entrySet()){
+						listOfAllVertices[it].adjacentVertices[totalNeigbors] = new Path (this.GetVertexList(entry.getKey(),listOfAllVertices),entry.getValue());
+						totalNeigbors++;
+					}
+					
+				}
+				
+			
+				return listOfAllVertices;
+	}
+	
+	
+	public static void main(String[] args) {
+		
+		
+		String runUntill = "Y"; 
+
+		while (runUntill.equalsIgnoreCase("Y")) {
+			
+			Dijkstra dijkstra = new Dijkstra();
+
+			Scanner input = new Scanner(System.in);
+			System.out.println("Enter the departure airport: ");
+			String departureAirport = input.next();
+			
+			System.out.println("Enter the arrival airport: ");
+			String arrivalAirport = input.next();
+
+			Vertex[] listOfAllVerticesInGraph = dijkstra.BuildPathNetwork();
+			
+			int departureIndex = 0;
+			
+			int id = 0;
+			while(id < listOfAllVerticesInGraph.length){
+				
+				if ((listOfAllVerticesInGraph[id].name).equals(departureAirport) == true) {
+					departureIndex = id; 
+				}
+								
+				id++;
+			}
+			
+			
+			int arrivalIndex = 0;
+			int ir = 0;
+			while(ir < listOfAllVerticesInGraph.length){
+				if ((listOfAllVerticesInGraph[ir].name).equals(arrivalAirport) == true) {
+					arrivalIndex = ir; 
+				}
+				ir++;
+			}
+			
+
+			dijkstra.InitializeAllNodes(listOfAllVerticesInGraph[departureIndex], listOfAllVerticesInGraph); 
+			System.out.println("Options By Price:");
+
+			int leastPrice = 0; 
+			leastPrice = dijkstra.GetWeight(listOfAllVerticesInGraph[arrivalIndex]); 
+			System.out.println("Price- " + leastPrice);
+			
+			int numberOfConnections = dijkstra.CountNumberOfAdjacentVertices(listOfAllVerticesInGraph[arrivalIndex]);
+			System.out.println("Connections- " + numberOfConnections);
+			
+			System.out.print("Route- ");
+			dijkstra.DisplayRoute(listOfAllVerticesInGraph[arrivalIndex]);
+
+			System.out.println("");
+			System.out.println("");
+			System.out.println("");
+			System.out.println("Check another route (Y/N)?"); 
+			runUntill = input.next();
+		}
+
+	}
+}
