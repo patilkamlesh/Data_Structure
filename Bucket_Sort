@@ -1,0 +1,327 @@
+import java.util.LinkedList;
+import java.util.Random;
+
+class BucketSortAndRadixSort {
+	/* This method is used to initialize all elements to zero */
+	public void InitializeArray(Integer[] arrayOfDigits) {
+
+		int arrayLength = arrayOfDigits.length;
+
+		// Now initialize all elements of the array to zero
+		for (int ix = 0; ix < arrayLength; ix++) {
+			arrayOfDigits[ix] = 0;
+		}
+	}
+
+	/* This method is used sort the numbers using BucketSort */
+	public void BucketSortElements(Integer[] arrayForSorting,
+			Integer[] arrayForElements) {
+
+		Integer elementToAdd = 0;
+		Integer count = 0;
+
+		for (int iy = 0; iy < arrayForElements.length; iy++) {
+			elementToAdd = arrayForElements[iy];
+
+			if (arrayForSorting[elementToAdd] == 0) {
+				arrayForSorting[elementToAdd] = 1;
+
+			} else {
+				count = arrayForSorting[elementToAdd] + 1;
+				arrayForSorting[elementToAdd] = count;
+			}
+
+		}
+
+	}
+
+	/* This method is used to print the array after sorting */
+	public void PrintElements(Integer[] arrayForSorting) {
+		int count = 0;
+
+		// System.out.println("\nElements after sorting- ");
+		for (int ix = 0; ix < arrayForSorting.length; ix++) {
+
+			count = arrayForSorting[ix];
+			// Now check if count is grater than 1 then we have to print that
+			// elements "count" times
+			if (count > 1) {
+
+				while (count > 0) {
+					System.out.print(" " + ix);
+					count--;
+				}
+			} else {
+				if (count != 0) {
+					System.out.println(" " + ix);
+				}
+
+			}
+		}
+
+	}
+
+	/* This method is used to generate random numbers and store in an array */
+	public void GenerateRandomNumbers(Integer[] arrayForElements) {
+		// Create random numbers
+		Random random = new Random();
+		Integer randomNumberToAdd = 0;
+
+		// Now generate random number between 0 to 1000 (including these
+		// numbers)
+		for (int ix = 0; ix < arrayForElements.length; ix++) {
+			randomNumberToAdd = random.nextInt(1000 - 0 + 1) + 0;
+			arrayForElements[ix] = randomNumberToAdd;
+		}
+	}
+
+	/* This method is used to generate "n" random numbers */
+	public void AddAndSortNumbers(int numberOfElements) {
+		// Create an array of size M =1000 + 1 (As we want to include 1000 in
+		// list of numbers to sort)
+		Integer[] arrayForSorting = new Integer[1001];
+
+		
+
+		// Create an array of "n" elements
+		Integer[] arrayForElements = new Integer[numberOfElements];
+
+		// Initialize all elements of the array to zero
+		InitializeArray(arrayForSorting);
+
+		// Generate random numbers
+		GenerateRandomNumbers(arrayForElements);
+
+		// Record start time
+		long startTime = System.currentTimeMillis();
+		BucketSortElements(arrayForSorting, arrayForElements);
+		PrintElements(arrayForSorting);
+		// Record end time
+		long endTime = System.currentTimeMillis();
+
+		System.out.println("\n\n\nBucket sort completed in : "
+				+ (endTime - startTime) + "  milli seconds for a list of " + ""
+				+ numberOfElements + "  elements\n");
+
+	}
+ 
+	/* This method is used to call the function which implements Radix Sort */
+	public void RadixSort(int numberOfElementsForRadix) {
+		
+		@SuppressWarnings("unchecked")
+		LinkedList<Integer>[] sortingArray = new LinkedList[10];
+
+		for (int ix = 0; ix < 10; ix++) {
+			sortingArray[ix] = new LinkedList<Integer>();
+		}
+
+		Integer [] inputNumbers = new Integer[numberOfElementsForRadix];
+		// Generate random numbers
+			GenerateRandomNumbers(inputNumbers);
+		
+
+		int count = 0;
+		Integer[] listOfOSs = new Integer[10];
+		
+		// Record start time
+		long startTime = System.currentTimeMillis();
+		for (int eachPlace = 1; eachPlace <= 1000; eachPlace = eachPlace * 10) {
+
+			for (int ie = 0; ie < 10; ie++) {
+				listOfOSs[ie] = sortingArray[ie].size();
+			}
+
+			RadixSort(eachPlace, sortingArray, inputNumbers, count, listOfOSs);
+			count++;
+		}
+		// Record end time
+		long endTime = System.currentTimeMillis();
+		
+		System.out.println("\nRadix sort completed in : "
+				+ (endTime - startTime) + "  milli seconds for a list of " + ""
+				+ numberOfElementsForRadix + "  elements\n");
+		
+		// Print the sorted elements
+		PrintElementsAfterRadixSort(sortingArray);
+
+		
+	}
+
+	/* This method is used to sort the elements using Radix sort */
+
+	public void RadixSort(int eachPlace, LinkedList<Integer>[] sortingArray,
+			Integer[] inputNumbers, int count, Integer[] listOfOSs) {
+
+		int position = 0;
+		int temp = 0;
+
+		LinkedList<Integer> originalList = new LinkedList<Integer>();
+		LinkedList<Integer> tempList = new LinkedList<Integer>();
+		
+
+		if (count == 0) {
+
+			for (int it = 0; it <= inputNumbers.length - 1; it++) {
+
+				temp = inputNumbers[it] / eachPlace;
+				position = temp % 10;
+				sortingArray[position].add(inputNumbers[it]);
+			}
+		} else {
+			for (int ir = 0; ir <= sortingArray.length - 1; ir++) {
+				originalList = sortingArray[ir];
+
+				if (originalList.size() == 1) {
+
+					int eachElement = originalList.get(0);
+					int temp1 = eachElement / eachPlace;
+					int position1 = temp1 % 10;
+
+					if (position1 == ir) {
+						continue;
+					} else {
+						tempList = sortingArray[position1];
+
+						sortingArray[position1].addLast(eachElement);
+						sortingArray[ir].remove(0);
+					}
+
+				}
+
+				else {
+
+					if (originalList.size() > 1) {
+
+						int temp5 = listOfOSs[ir];
+
+						int size = originalList.size();
+
+						int ip = 0;
+
+						while (ip < temp5) {
+							int eachElement = originalList.get(0);
+
+							int temp1 = eachElement / eachPlace;
+							int position1 = temp1 % 10;
+
+							if (position1 == ir) {
+								sortingArray[position1].addLast(eachElement);
+								originalList.remove(0);
+
+							}
+
+							if (position1 != ir) {
+
+								sortingArray[position1].addLast(eachElement);
+								originalList.remove(0);
+							}
+							ip++;
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+		
+
+	}
+	
+	/*This method is used to print the elements after performing Radix-Sort*/
+	public void PrintElementsAfterRadixSort(LinkedList<Integer>[] sortingArray){
+		System.out.print("[");
+		for (int ix = 0; ix < 10; ix++) {
+
+			if (sortingArray[ix].size() != 0) {
+
+				for (int pc = 0; pc < sortingArray[ix].size(); pc++) {
+					System.out.print(" ");
+					System.out.print(sortingArray[ix].get(pc));
+				}
+
+			}
+
+		}
+		System.out.print("]");
+		System.out.println("");
+	}
+}
+
+public class Sort {
+	public static void main(String args[]) {
+
+		BucketSortAndRadixSort bucketSort = new BucketSortAndRadixSort();
+		int numberOfElements = 0;
+
+		/*** This section is used to implement Bucket Sort ***/
+		System.out.println("");
+		System.out.println("");
+		System.out.println("***********************BUCKET SORT***********************");
+		// For 100000 elements 
+		numberOfElements = 100000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElements
+				+ " elements-*-*-*-*-\n");
+		bucketSort.AddAndSortNumbers(numberOfElements);
+		System.out.println("\n\n");
+
+		 //For 200000 elements 
+		numberOfElements = 200000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElements
+				+ " elements-*-*-*-*-\n");
+		bucketSort.AddAndSortNumbers(numberOfElements);
+		System.out.println("\n\n");
+
+		 //For 1000000 elements 
+		numberOfElements = 1000000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElements
+				+ " elements-*-*-*-*-\n");
+		bucketSort.AddAndSortNumbers(numberOfElements);
+		System.out.println("\n\n");
+
+		
+		
+		
+		
+		
+		
+		/*** This section is used to implement Radix Sort ***/
+		BucketSortAndRadixSort radixSort = new BucketSortAndRadixSort();
+		
+		System.out.println("");
+		System.out.println("");
+		System.out.println("***********************RADIX SORT***********************");
+		
+
+		
+		/* For 100000 elements */
+		int numberOfElementsForRadix = 100000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElementsForRadix
+				+ " elements-*-*-*-*-\n");
+		radixSort.RadixSort(numberOfElementsForRadix);
+		System.out.println("\n\n");
+		
+		
+		
+		// For 200000 elements 
+		numberOfElementsForRadix = 200000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElementsForRadix
+				+ " elements-*-*-*-*-\n");
+		radixSort.RadixSort(numberOfElementsForRadix);
+		System.out.println("\n\n");
+		
+		
+		
+		// For 1000000 elements 
+		numberOfElementsForRadix = 1000000;
+		System.out.println("\n\n-*-*-*-*-For " + numberOfElementsForRadix
+				+ " elements-*-*-*-*-\n");
+		radixSort.RadixSort(numberOfElementsForRadix);
+		System.out.println("\n\n");
+		
+		
+		
+	}
+}
