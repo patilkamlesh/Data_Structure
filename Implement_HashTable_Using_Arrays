@@ -1,0 +1,165 @@
+import java.util.ArrayList;
+import java.util.List;
+
+/*This class is used to implement hash table and its related functions*/
+public class HashTable<AllKeyType, AllValueType> {
+
+	private static Integer hashTableCapacity = 4;
+
+	AllKeyType[] AllKeys;
+
+	AllValueType[] AllValues;
+
+	private int newSize; // N
+	private int sizeOfHashMap; // M
+
+	public void setKeys(AllKeyType[] AllKeys) {
+		this.AllKeys = AllKeys;
+	}
+
+	public void setValue(AllValueType[] AllValues) {
+		this.AllValues = AllValues;
+	}
+
+	// Create initial hash table
+	public HashTable() {
+		this(hashTableCapacity);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public HashTable(Integer hashTableCapacity) {
+		sizeOfHashMap = hashTableCapacity;
+		AllKeys = (AllKeyType[]) new Object[sizeOfHashMap];
+		AllValues = (AllValueType[]) new Object[sizeOfHashMap];
+	}
+
+	/* This method is used to return the length of the hashmap */
+	public Integer GetSize() {
+		return newSize;
+	}
+
+	/* This method is used to expand the hashmap */
+	private void ExpandHashMap(Integer newSize) {
+
+		HashTable<AllKeyType, AllValueType> newTemp = new HashTable<AllKeyType, AllValueType>(
+				newSize);
+
+		Integer index = 0;
+
+		while (index < sizeOfHashMap) {
+
+			if (AllKeys[index] != null) {
+				newTemp.Insert(AllKeys[index], AllValues[index]);
+			}
+			index++;
+		}
+
+		AllValues = newTemp.AllValues;
+		AllKeys = newTemp.AllKeys;
+		sizeOfHashMap = newTemp.sizeOfHashMap;
+
+	}
+
+	/* This method is used to insert an element in the HashMap */
+	public boolean Insert(AllKeyType key, AllValueType value) {
+
+		if (key == null) {
+			return false;
+		}
+
+		// First check if table is more than 50% full and if this is the case
+		// then double the table size
+
+		if (newSize > (sizeOfHashMap / 2)) {
+			// Then double the size of the hashmap
+			ExpandHashMap(sizeOfHashMap * 2);
+		}
+
+		int ix = HashKey(key);
+
+		while (AllKeys[ix] != null) {
+			if (AllKeys[ix].equals(key)) {
+				AllValues[ix] = value;
+				return true;
+			}
+
+			ix = (ix + 1) % sizeOfHashMap;
+		}
+
+		AllKeys[ix] = key;
+		AllValues[ix] = value;
+		newSize++;
+		return true;
+
+	}
+
+	/*
+	 * This method is used to check whether a particular element is present in
+	 * the hashmap
+	 */
+	public boolean Contains(AllKeyType x) {
+		if (getValueFromHashMap(x) == null)
+			return false;
+		else
+			return true;
+	}
+
+	/* This method returns the value associated with the key in the hashmap */
+	public AllValueType getValueFromHashMap(AllKeyType key) {
+		Integer index = HashKey(key);
+
+		while (AllKeys[index] != null) {
+
+			if ((AllKeys[index].equals(key))) {
+				return AllValues[index];
+			}
+			index = (index + 1) % sizeOfHashMap;
+
+		}
+
+		return null;
+	}
+
+	/* This method is used to calculate hash function */
+	public Integer HashKey(AllKeyType elementToBeAdded) {
+
+		return Math.abs(elementToBeAdded.hashCode()) % sizeOfHashMap;
+
+	}
+
+	/*This method is used to obtain an iterable on list of keys of the hashmap*/
+	public Iterable<AllKeyType> Allkeys() {
+		ArrayList<AllKeyType> arrayList = new ArrayList<AllKeyType>();
+		for (int i = 0; i < sizeOfHashMap; i++)
+			if (AllKeys[i] != null)
+				arrayList.add(AllKeys[i]);
+		return arrayList;
+	}
+
+	/*This method is used to print the hash table*/
+	public void printHashTable() {
+		int count = 0;
+		for (AllKeyType key : Allkeys()) {
+
+			System.out.println(key + " " + getValueFromHashMap(key));
+			count++;
+		}
+		System.out.println("Count: " + count);
+
+	}
+
+	/*This method is used to obtain list of all keys from the hash table*/
+	public List<String> GetOnlyKeysFromHashTable() {
+
+		List<String> listOfKeys = new ArrayList<String>();
+		for (AllKeyType key : Allkeys()) {
+			listOfKeys.add(key.toString());
+		}
+		return listOfKeys;
+	}
+	
+	
+	
+
+}
